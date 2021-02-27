@@ -7,7 +7,7 @@ export const setItem = (key, value) => {
   if (typeof value === 'object') {
     value = JSON.stringify(value)
   }
-  window.localStorage.setItem(key.value)
+  window.localStorage.setItem(key, value)
 }
 
 /* 获取数据 */

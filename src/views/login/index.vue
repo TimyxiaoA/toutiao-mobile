@@ -1,7 +1,11 @@
 <template>
   <div class="login-container">
     <!-- 导航栏 -->
-    <van-nav-bar class="page-nav-bar" title="登录" />
+    <van-nav-bar class="page-nav-bar" title="登录">
+      <template #left>
+        <van-icon name="cross" @click="$router.back()" />
+      </template>
+    </van-nav-bar>
 
     <!-- 登陆表单 -->
     <van-form @submit="onSubmit" ref="loginFormRef">
@@ -68,7 +72,7 @@ export default {
         mobile: [
           { required: true, message: '手机号不能为空' },
           {
-            pattern: /^1[3|5|6|7|8]\d{9}$/,
+            pattern: /^1[35678]\d{9}$/,
             message: '手机号格式不正确'
           }
         ],
@@ -98,11 +102,13 @@ export default {
       // 3.提交表单请求登录
       try {
         const { data: res } = await login(user)
-        this.$toast.success('登录成功!')
         console.log(res)
-        // 触发事件存储 token
+        this.$toast.success('登录成功!')
+        // 触发事件存储 token 并跳转页面
         this.$store.commit('setUser', res.data)
+        this.$router.push(this.$route.params.redirect || '/')
       } catch (err) {
+        console.log(err.response)
         if (err.response.status === 400) {
           this.$toast.fail('手机号或验证码不正确!')
         } else {
@@ -116,7 +122,7 @@ export default {
       try {
         await this.$refs.loginFormRef.validate('mobile')
       } catch (err) {
-        console.log('验证失败', err)
+        return console.log('手机号验证失败', err)
       }
 
       // 2.验证通过 展示倒计时
@@ -128,7 +134,7 @@ export default {
         this.$toast('发送成功!')
         console.log(res)
       } catch (err) {
-        this.isCountDownShow = false
+        this.isCountDownShow = false // 发送失败 不展示倒计时组件
         if (err.response.status === 429) {
           this.$toast('发送次数过多,请稍后再试!')
         } else {
@@ -153,15 +159,18 @@ export default {
     font-size: 22px;
     color: #666;
   }
-  .van-button--small {
+  /deep/.van-field__button {
+    display: flex;
+  }
+  /deep/.van-button--small {
     padding: 0;
   }
   .login-btn-box {
-    padding: 53px 28px;
+    padding: 53px 33px;
     .login-btn {
       background: #6db4fb;
-      border-radius: 10px;
       border: none;
+      border-radius: 10px;
     }
   }
 }

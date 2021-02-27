@@ -17,6 +17,7 @@ export default new Vuex.Store({
       state.user = data
       // 使用本地储存保存 token 持久化页面
       setItem(TOKEN_KEY, state.user)
+
       // window.localStorage.setItem(TOKEN_KEY, JSON.stringify(state.user))
     }
   },
