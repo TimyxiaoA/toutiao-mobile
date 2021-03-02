@@ -10,6 +10,9 @@ import 'vant/lib/index.css'
 
 // 加载全局样式
 import './styles/index.less'
+
+// 加载 relativeTime 过滤器
+import '@/utils/dayjs.js'
 // 加载注册 Vant 组件
 Vue.use(Vant)
 
