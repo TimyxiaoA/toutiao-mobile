@@ -1,11 +1,13 @@
 <template>
   <div class="search-suggestion">
     <van-cell
-      v-for="(item, index) in suggestions"
+      v-for="(text, index) in suggestions"
       :key="index"
-      :title="item"
       icon="search"
-    />
+      @click="$emit('search', text)"
+    >
+      <div slot="title" v-html="highlight(text)"></div>
+    </van-cell>
   </div>
 </template>
 
@@ -40,9 +42,20 @@ export default {
       const { data: res } = await getSearchSuggestion(q)
       console.log(res)
       this.suggestions = res.data.options
+    },
+    highlight(text) {
+      const highlightStr = `<span class="active">${this.searchText}</span>`
+      const reg = new RegExp(this.searchText, 'gi') // 全局加不区分大小写
+      return text.replace(reg, highlightStr)
     }
   }
 }
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.search-suggestion {
+  /deep/.active {
+    color: #3296fa;
+  }
+}
+</style>
