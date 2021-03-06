@@ -6,15 +6,15 @@
 
     <div class="main-wrap">
       <!-- 加载中 -->
-      <div class="loading-wrap">
+      <div v-if="loading" class="loading-wrap">
         <van-loading color="#3296fa" vertical>加载中</van-loading>
       </div>
       <!-- /加载中 -->
 
       <!-- 加载完成-文章详情 -->
-      <div class="article-detail">
+      <div v-else-if="article.title" class="article-detail">
         <!-- 文章标题 -->
-        <h1 class="article-title">这是文章标题</h1>
+        <h1 class="article-title">{{ article.title }}</h1>
         <!-- /文章标题 -->
 
         <!-- 用户信息 -->
@@ -24,78 +24,200 @@
             slot="icon"
             round
             fit="cover"
-            src="https://img.yzcdn.cn/vant/cat.jpeg"
+            :src="article.aut_photo"
           />
-          <div slot="title" class="user-name">黑马头条号</div>
-          <div slot="label" class="publish-date">14小时前</div>
-          <van-button
+          <div slot="title" class="user-name">{{ article.aut_name }}</div>
+          <div slot="label" class="publish-date">
+            {{ article.pubdate | relativeTime }}
+          </div>
+
+          <!-- 封装关注按钮组件 -->
+          <follow-user
             class="follow-btn"
-            type="info"
-            color="#3296fa"
-            round
-            size="small"
-            icon="plus"
-            >关注</van-button
-          >
-          <!-- <van-button
-            class="follow-btn"
-            round
-            size="small"
-          >已关注</van-button> -->
+            :is-followed.sync="article.is_followed"
+            :user-id="article.aut_id"
+          ></follow-user>
+          <!--/封装关注按钮组件 -->
         </van-cell>
         <!-- /用户信息 -->
 
         <!-- 文章内容 -->
-        <div class="article-content">这是文章内容</div>
+        <div
+          ref="articleContentRef"
+          class="article-content markdown-body"
+          v-html="article.content"
+        ></div>
         <van-divider>正文结束</van-divider>
+
+        <!-- 评论列表 -->
+        <comment-list
+          :source="articleId"
+          type="a"
+          :list="CommentList"
+          @onload-success="totalCommentCount = $event.total_count"
+          @click-reply="onClickReply"
+        ></comment-list>
+        <!-- /评论列表 -->
+
+        <!-- 底部区域 -->
+        <div class="article-bottom">
+          <van-button
+            class="comment-btn"
+            type="default"
+            round
+            size="small"
+            @click="isPostShow = true"
+            >写评论</van-button
+          >
+          <van-icon name="comment-o" :badge="totalCommentCount" color="#777" />
+          <!-- 收藏文章 -->
+          <collect-article
+            class="btn-item"
+            v-model="article.is_collected"
+            :article-id="article.art_id"
+          ></collect-article>
+
+          <!-- 点赞文章 -->
+          <like-article
+            class="btn-item"
+            v-model="article.attitude"
+            :article-id="article.art_id"
+          ></like-article>
+
+          <van-icon name="share" color="#777"></van-icon>
+        </div>
+        <!-- /底部区域 -->
+
+        <!-- 发表评论弹出层 -->
+        <van-popup v-model="isPostShow" position="bottom">
+          <!-- 发布评论组件 -->
+          <comment-post
+            :target="article.art_id"
+            @post-success="onPostSuccess"
+          ></comment-post>
+        </van-popup>
+        <!-- /发表评论弹出层 -->
       </div>
       <!-- /加载完成-文章详情 -->
 
       <!-- 加载失败：404 -->
-      <div class="error-wrap">
+      <div v-else-if="errStatus === 404" class="error-wrap">
         <van-icon name="failure" />
         <p class="text">该资源不存在或已删除！</p>
       </div>
       <!-- /加载失败：404 -->
 
       <!-- 加载失败：其它未知错误（例如网络原因或服务端异常） -->
-      <div class="error-wrap">
+      <div v-else class="error-wrap">
         <van-icon name="failure" />
         <p class="text">内容加载失败！</p>
-        <van-button class="retry-btn">点击重试</van-button>
+        <van-button class="retry-btn" @click="loadArticle">点击重试</van-button>
       </div>
       <!-- /加载失败：其它未知错误（例如网络原因或服务端异常） -->
     </div>
 
-    <!-- 底部区域 -->
-    <div class="article-bottom">
-      <van-button class="comment-btn" type="default" round size="small"
-        >写评论</van-button
-      >
-      <van-icon name="comment-o" badge="123" color="#777" />
-      <van-icon color="#777" name="star-o" />
-      <van-icon color="#777" name="good-job-o" />
-      <van-icon name="share" color="#777"></van-icon>
-    </div>
-    <!-- /底部区域 -->
+    <!-- 回复评论弹出层 -->
+    <van-popup
+      v-model="isReplyShow"
+      position="bottom"
+      :style="{ height: '100%' }"
+    >
+      <comment-reply
+        :comment="currentComment"
+        @close="isReplyShow = false"
+      ></comment-reply>
+    </van-popup>
   </div>
 </template>
 
 <script>
+import { getAticleInfo } from '@/api/article.js'
+import './github-markdown.css'
+import { ImagePreview } from 'vant' // 图片预览组件
+import FollowUser from '@/components/follow-user'
+import CollectArticle from '@/components/collect-article'
+import LikeArticle from '@/components/like-article'
+import CommentList from './components/comment-list'
+import CommentPost from './components/comment-post'
+import CommentReply from './components/comment-reply'
 export default {
   name: 'ArticleIndex',
+  components: {
+    FollowUser,
+    CollectArticle,
+    LikeArticle,
+    CommentList,
+    CommentPost,
+    CommentReply
+  },
   props: {
     articleId: {
-      type: [Number, String],
+      type: [Number, String, Object],
       requried: true
     }
   },
 
   data() {
-    return {}
+    return {
+      loading: false,
+      article: {}, // 文章详情
+      errStatus: 0, // 错误状态码
+      totalCommentCount: 0,
+      isPostShow: false,
+      CommentList: [],
+      isReplyShow: false,
+      currentComment: []
+    }
   },
 
-  methods: {}
+  created() {
+    this.loadArticle()
+  },
+  methods: {
+    async loadArticle() {
+      this.loading = true
+      try {
+        const { data: res } = await getAticleInfo(this.articleId)
+        console.log(res)
+        this.article = res.data
+        this.loading = false
+        this.$nextTick(() => {
+          this.previewImg()
+        })
+      } catch (err) {
+        if (err.response && err.response.status === 404) {
+          this.errStatus = 404
+        }
+        this.loading = false
+      }
+    },
+    previewImg() {
+      const articleContentEl = this.$refs.articleContentRef
+      const allImg = articleContentEl.querySelectorAll('img')
+      console.log(allImg)
+      const images = []
+      allImg.forEach((img, index) => {
+        images.push(img.src)
+        img.onclick = () => {
+          // 图片预览方法
+          ImagePreview({
+            images: images,
+            startPosition: index
+          })
+        }
+      })
+    },
+    onPostSuccess(data) {
+      // 1.关闭弹出层 2.将发布内容添加到视图顶部
+      this.isPostShow = false
+      this.CommentList.unshift(data.new_obj)
+      this.totalCommentCount++
+    },
+    onClickReply(comment) {
+      this.isReplyShow = true
+      this.currentComment = comment
+    }
+  }
 }
 </script>
 
@@ -204,12 +326,19 @@ export default {
       line-height: 46px;
       color: #a7a7a7;
     }
-    .van-icon {
+    /deep/.van-icon {
       font-size: 40px;
       .van-info {
         font-size: 16px;
         background-color: #e22829;
       }
+    }
+    .btn-item {
+      border: 0;
+      padding: 0;
+      height: 40px;
+      line-height: 40px;
+      color: #777;
     }
   }
 }

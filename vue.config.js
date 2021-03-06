@@ -1,5 +1,5 @@
 module.exports = {
-  /* devServer: {
+  devServer: {
     proxy: {
       '/app': {
         target: 'http://toutiao-app.itheima.net/',
@@ -10,5 +10,5 @@ module.exports = {
         }
       }
     }
-  } */
+  }
 }
