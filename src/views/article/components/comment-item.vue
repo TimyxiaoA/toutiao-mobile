@@ -31,7 +31,7 @@
           class="reply-btn"
           round
           @click="$emit('click-reply', comment)"
-          >回复{{ comment.like_count }}</van-button
+          >回复{{ comment.reply_count }}</van-button
         >
       </div>
     </div>

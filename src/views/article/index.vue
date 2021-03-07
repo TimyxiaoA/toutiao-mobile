@@ -1,7 +1,12 @@
 <template>
   <div class="article-container">
     <!-- 导航栏 -->
-    <van-nav-bar class="page-nav-bar" left-arrow title="黑马头条"></van-nav-bar>
+    <van-nav-bar
+      class="page-nav-bar"
+      left-arrow
+      title="黑马头条"
+      @click-left="$router.back()"
+    ></van-nav-bar>
     <!-- /导航栏 -->
 
     <div class="main-wrap">
@@ -117,12 +122,14 @@
     </div>
 
     <!-- 回复评论弹出层 -->
+    <!-- popup 内容懒加载 不会重新创建和销毁 -->
     <van-popup
       v-model="isReplyShow"
       position="bottom"
       :style="{ height: '100%' }"
     >
       <comment-reply
+        :key="isReplyShow"
         :comment="currentComment"
         @close="isReplyShow = false"
       ></comment-reply>
@@ -149,6 +156,11 @@ export default {
     CommentList,
     CommentPost,
     CommentReply
+  },
+  provide: function() {
+    return {
+      articleId: this.articleId
+    }
   },
   props: {
     articleId: {

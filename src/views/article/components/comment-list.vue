@@ -61,7 +61,7 @@ export default {
         // 1.异步更新数据
         const { data: res } = await getComments({
           type: this.type,
-          source: this.source,
+          source: this.source.toString(),
           offset: this.offset,
           limit: this.limit
         })

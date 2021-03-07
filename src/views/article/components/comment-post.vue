@@ -24,6 +24,11 @@ import { addComments } from '@/api/comment.js'
 
 export default {
   name: 'CommentPost',
+  inject: {
+    articleId: {
+      type: [Number, String, Object]
+    }
+  },
   props: {
     target: {
       type: [Number, String, Object],
@@ -44,9 +49,12 @@ export default {
       })
       try {
         const { data: res } = await addComments({
-          target: this.target,
+          target: this.target.toString(),
           content: this.message,
-          art_id: null
+          art_id:
+            this.articleId.toString() === this.target.toString()
+              ? null
+              : this.articleId.toString()
         })
         console.log(res)
         // 1.关闭弹出层 2.将发布内容添加到视图顶部 3.清空输入框
