@@ -90,7 +90,7 @@ request.interceptors.response.use(
             }
           } = await requestToken({
             method: 'PUT',
-            url: '//v1_0/authorizations',
+            url: '/v1_0/authorizations',
             headers: {
               Authorization: `Bearer ${user.refresh_token}`
             }
