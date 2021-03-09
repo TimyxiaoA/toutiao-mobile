@@ -3,7 +3,10 @@
     <!-- 导航栏 -->
     <van-nav-bar class="page-nav-bar" title="登录">
       <template #left>
-        <van-icon name="cross" @click="$router.back()" />
+        <van-icon
+          name="cross"
+          @click="$router.push($route.query.redirect || '/')"
+        />
       </template>
     </van-nav-bar>
 
@@ -102,11 +105,14 @@ export default {
       // 3.提交表单请求登录
       try {
         const { data: res } = await login(user)
-        console.log(res)
         this.$toast.success('登录成功!')
         // 触发事件存储 token 并跳转页面
         this.$store.commit('setUser', res.data)
-        this.$router.push(this.$route.params.redirect || '/')
+
+        // 清除 LayoutIndex 缓存
+        this.$store.commit('removeCachePage', 'LayoutIndex')
+
+        this.$router.push(this.$route.query.redirect || '/')
       } catch (err) {
         console.log(err.response)
         if (err.response.status === 400) {

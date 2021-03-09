@@ -74,7 +74,7 @@ export default {
     },
     onCancel() {
       console.log('取消')
-      this.$router.push(this.$route.params.derirect || '/')
+      this.$router.push(this.$route.query.derirect || '/')
     }
   }
 }

@@ -8,7 +8,7 @@
         icon="search"
         type="info"
         round
-        :to="{ name: 'search', params: { redirect: '/' } }"
+        :to="{ name: 'search', query: { redirect: '/' } }"
         >搜索</van-button
       >
     </van-nav-bar>

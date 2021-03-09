@@ -1,5 +1,5 @@
 <template>
-  <div class="article-list">
+  <div class="article-list" ref="article-list">
     <van-pull-refresh
       v-model="isRefreshLoading"
       :success-text="refreshSuccessText"
@@ -25,6 +25,7 @@
 <script>
 import { getAticlesById } from '@/api/article.js'
 import ArticleItem from '@/components/article-item/index.vue'
+import { debounce } from 'lodash'
 
 export default {
   name: 'ArticleList',
@@ -59,7 +60,6 @@ export default {
           with_top: 1
         })
         // 2.将数据写入到 list 数组中
-        console.log(res)
         this.list.push(...res.data.results)
         // 3.加载状态结束
         this.loading = false
@@ -84,7 +84,6 @@ export default {
           with_top: 1
         })
         // 2.将数据写入到 list 数组中
-        console.log(res)
         this.list.unshift(...res.data.results)
         // 3.加载状态结束
         this.isRefreshLoading = false
@@ -95,6 +94,19 @@ export default {
         this.refreshSuccessText = '刷新失败,稍后再试!'
       }
     }
+  },
+  mounted() {
+    const articleList = this.$refs['article-list']
+    articleList.onscroll = debounce(() => {
+      this.scrollTop = articleList.scrollTop
+    }, 50)
+  },
+  activated() {
+    // 从缓存中被激活
+    this.$refs['article-list'].scrollTop = this.scrollTop
+  },
+  deactivated() {
+    // 从缓存中失去活动
   }
 }
 </script>

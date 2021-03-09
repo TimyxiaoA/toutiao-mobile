@@ -7,7 +7,7 @@ import request from '@/utils/request'
 export const login = data => {
   return request({
     method: 'POST',
-    url: '/app/v1_0/authorizations',
+    url: '/v1_0/authorizations',
     data
   })
 }
@@ -16,7 +16,7 @@ export const login = data => {
 export const sendSms = mobile => {
   return request({
     method: 'GET',
-    url: `/app/v1_0/sms/codes/${mobile}`
+    url: `/v1_0/sms/codes/${mobile}`
   })
 }
 
@@ -24,7 +24,7 @@ export const sendSms = mobile => {
 export const getUserInfo = () => {
   return request({
     method: 'GET',
-    url: '/app/v1_0/user'
+    url: '/v1_0/user'
   })
 }
 
@@ -32,7 +32,7 @@ export const getUserInfo = () => {
 export const getUserChannels = () => {
   return request({
     method: 'GET',
-    url: '/app/v1_0/user/channels'
+    url: '/v1_0/user/channels'
   })
 }
 
@@ -40,7 +40,7 @@ export const getUserChannels = () => {
 export const deleteFollow = target => {
   return request({
     method: 'DELETE',
-    url: `/app/v1_0/user/followings/${target}`
+    url: `/v1_0/user/followings/${target}`
   })
 }
 
@@ -48,9 +48,37 @@ export const deleteFollow = target => {
 export const addFollow = target => {
   return request({
     method: 'POST',
-    url: '/app/v1_0/user/followings',
+    url: '/v1_0/user/followings',
     data: {
       target
     }
+  })
+}
+
+// 获取用户个人资料
+export const getUserProfile = () => {
+  return request({
+    method: 'GET',
+    url: '/v1_0/user/profile'
+  })
+}
+
+// 编辑用户个人资料（包含实名认证）
+export const updateUserProfile = data => {
+  return request({
+    method: 'PATCH',
+    url: '/v1_0/user/profile',
+    data
+  })
+}
+
+/**
+ * 更新头像
+ */
+export const updateUserPhoto = data => {
+  return request({
+    method: 'PATCH',
+    url: '/v1_0/user/photo',
+    data
   })
 }

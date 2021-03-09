@@ -7,7 +7,7 @@ import request from '@/utils/request.js'
 export const getSearchSuggestion = q => {
   return request({
     method: 'GET',
-    url: '/app/v1_0/suggestion',
+    url: '/v1_0/suggestion',
     params: { q }
   })
 }
@@ -16,7 +16,7 @@ export const getSearchSuggestion = q => {
 export const getSearchResults = params => {
   return request({
     method: 'GET',
-    url: '/app/v1_0/search',
+    url: '/v1_0/search',
     params
   })
 }

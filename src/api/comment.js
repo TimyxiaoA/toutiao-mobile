@@ -7,7 +7,7 @@ import request from '@/utils/request'
 export const getComments = params => {
   return request({
     method: 'GET',
-    url: '/app/v1_0/comments',
+    url: '/v1_0/comments',
     params
   })
 }
@@ -16,7 +16,7 @@ export const getComments = params => {
 export const deleteCommentLike = target => {
   return request({
     method: 'DELETE',
-    url: `/app/v1_0/comment/likings/${target}`
+    url: `/v1_0/comment/likings/${target}`
   })
 }
 
@@ -24,7 +24,7 @@ export const deleteCommentLike = target => {
 export const addCommentLike = target => {
   return request({
     method: 'POST',
-    url: '/app/v1_0/comment/likings',
+    url: '/v1_0/comment/likings',
     data: {
       target: target.toString()
     }
@@ -35,7 +35,7 @@ export const addCommentLike = target => {
 export const addComments = data => {
   return request({
     method: 'POST',
-    url: '/app/v1_0/comments',
+    url: '/v1_0/comments',
     data
   })
 }
